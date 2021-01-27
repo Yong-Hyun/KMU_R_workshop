@@ -14,4 +14,15 @@ knitr::opts_chunk$set(echo = TRUE)
   * 꼭 써야 한다면 좀 쉬우면 안 되나요?
   + 힘드넹
   
-  
+```{r}
+data("iris")
+
+View(iris)
+names(iris)
+library(dplyr)
+library(ggplot2)
+iris %>% 
+  ggplot(.,aes(x=Sepal.Length, y=Sepal.Width))+
+  geom_line()
+```
+
