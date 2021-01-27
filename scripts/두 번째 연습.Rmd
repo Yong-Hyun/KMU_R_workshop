@@ -1,0 +1,10 @@
+---
+title: "test_02"
+author: "Lim Yong-Hyun"
+date: '2021 1 27 '
+output: html_document
+---
+
++ 바보야 깃허브 사용법 모르겠지?
++ 아 증말.
++ 새로운걸 배우기는 너무 힘들어.
