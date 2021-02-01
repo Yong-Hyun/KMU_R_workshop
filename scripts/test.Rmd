@@ -25,7 +25,10 @@ library(dplyr)
 library(ggplot2)
 iris %>% 
   ggplot(.,aes(x=Sepal.Length, y=Sepal.Width))+
-  geom_line()
+  geom_line() %>% 
+  gg
+
+
 
 ggsave("testggplot.png", )
 
