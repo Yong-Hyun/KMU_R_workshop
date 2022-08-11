@@ -1,9 +1,9 @@
 ##### ------------------------------ ####
-
 # title: Correlation & Regression
 # date: 2022.08.09
 # author: Ph.D. Y-H Lim
-# R version 4.2.1 (2022-06-23 ucrt)/ # Platform: x86_64-w64-mingw32/x64 (64-bit)
+# R version 4.2.1 (2022-06-23 ucrt)/ 
+# Platform: x86_64-w64-mingw32/x64 (64-bit)
 # Running under: Windows 10 x64 (build 22000)
 ##### ------------------------------ ####
 
@@ -31,21 +31,21 @@ library(ggstatsplot)
 #1. 작은 데이터 상관분석 실습  --------
 #### exercises
 
-#1. variable 
+#1). variable 
 x1 <- c(4, 3, 2, 1, 5, 1) # 자부심
 y1 <- c(5, 4, 2, 2, 4, 2) # 품위
 z1 <- c(1, 2, 3, 4, 1, 1) # 심리적 붕괴
 
 xyz <- data.frame(x1, y1, z1) # 데이터 프레임
 
-#2. plot
+#2). plot
 ggplot(xyz, aes(x=x1, y=y1))+
   geom_point()+
   geom_line()+
   xlab("자부심")+
   ylab("품위")
 
-#3. add trend line
+#3). add trend line
 ggplot(xyz, aes(x=x1, y=y1))+
   geom_point()+
   geom_line()+
@@ -56,7 +56,7 @@ ggplot(xyz, aes(x=x1, y=y1))+
       axis.text.x = element_text(size = 12), 
       axis.text.y = element_text(size = 12)) 
 
-#4. plot of the correlation coefficient matrix 
+#4). 상관계수 매트릭스 그리기
 
 # pearson r 
 ggcorrmat(xyz, type = "parametric", matrix.type="lower") 
@@ -67,7 +67,7 @@ xyz %>%
 
 
 
-#2. 내장 데이터 상관분석 실습 -------------
+#2. 내장 데이터 이용 상관분석 실습 -------------
 
 # 내장 데이터 객체로 저장
 my_data <- mtcars
@@ -87,7 +87,7 @@ head(my_data, 6)
 # 가정1) 
 library("ggpubr") 
 
-ggscatter(my_data, x = "mpg", y = "wt", 
+test <- ggscatter(my_data, x = "mpg", y = "wt", 
           add = "reg.line", conf.int = TRUE, 
           cor.coef = TRUE, cor.method = "pearson",
           xlab = "Miles/(US) gallon", ylab = "Weight (1000 lbs)")
@@ -109,7 +109,7 @@ ggqqplot(my_data$wt, ylab = "WT")
 # 정규성 플롯(normality plots)을 통해, 두 모집단은 정규분포에서 기인함을 인지
 
 
-# Pearson correlation test ----------------
+# Pearson correlation test 
 res <- cor.test(my_data$wt, my_data$mpg, method = "pearson")  # stats 패키지에서
 res
 
@@ -144,39 +144,7 @@ resH <- rcorr(as.matrix(my_data))  #rcorr() 피어슨 및 스피어맨 상관 �
 resH
 
 
-# ++++++++++++++++++++++++++++
-# flattenCorrMatrix
-# ++++++++++++++++++++++++++++
-# cormat : matrix of the correlation coefficients
-# pmat : matrix of the correlation p-values
-
-flattenCorrMatrix <- function(cormat, pmat) {
-  ut <- upper.tri(cormat)
-  data.frame(
-    row = rownames(cormat)[row(cormat)[ut]],
-    column = rownames(cormat)[col(cormat)[ut]],
-    cor  =(cormat)[ut],
-    p = pmat[ut]
-  )
-}
-
-flattenCorrMatrix(resH$r, resH$P)
-
-
-# filechoose 방법을 사용하여 시스템에서 데이터 세트를 선택하는 방법
-# If .txt tab file
-# my_data <- read.delim(file.choose())  # 선택상자 뜨면 취소할 것-자기 데이터가 있을 경우 사용
-# Or, if .csv file
-# my_data <- read.csv(file.choose())    # 선택상자 뜨면 취소할 것
-
-# 상관행렬 시각화
-symnum(x, cutpoints = c(0.3, 0.6, 0.8, 0.9, 0.95),
-       symbols = c(" ", ".", ",", "+", "*", "B"),
-       abbr.colnames = TRUE)
-
-# x: 시각화할 상관 행렬
-# cutpoints: 상관 계수 컷포인트. 0과 0.3 사이의 상관 계수는 공백(" ")으로 대체. 
-# 0.3과 0.6 사이의 상관 계수는 다음으로 대체""; 등 …
+# 함수를  상관[참조]계수 매
 # symbols: 사용할 기호
 # abbr.colnames: 논리적 값. TRUE이면 colname이 축약
 
@@ -213,11 +181,68 @@ chart.Correlation(my_data, histogram=TRUE, pch=19)
 
 
 
-#2. 부분상관 준부분 상관 분석 실습  --------
+#3. 부분상관(partial) 준부분(semi-partial 또는 part) 상관 분석  --------
+# 용어 혼란: 편상관, 준편상관/여과상관, 준여과상관
+
+library(ppcor) 
+
+#### 부분상관(partial correlation) 
+# IV: x1, x2, DV: y가 있을 때 x2의 효과를 제거 후 x1이 **남아있는 y의 변량(전체변량 아님)**을 설명하는 비율
+# - 결국 x1과 y의 상관관계(x1을 통제했을 때도 마찬가지)
+# - 부분상관이 원래 상관보다 더 오르면? x2가 억제변인으로 작용하던 것이고
+# - 더 낮아지면? x2가 허위변인으로 작용하던 것.
+
+dataset <- iris
+str(dataset)
+dataset$Species <- NULL  # 상관분석에 요인변수는 없애야 함. 
+pcor(dataset, method="pearson")               # partial correlation 콘솔에서 한 번 확인
+iris_pcor <- pcor(dataset, method="pearson")   # partial correlation 결과를 객체 할당
+iris_pcor$estimate # partial correlations만 추출할 수 있음
+iris_pcor$p.value # results of significance tests만 추출
+iris_pcor$statistic # t-test만 추출
+
+# partial correlation between x and y while controlling for z
+partial_cor <- pcor.test(dataset$Sepal.Length, dataset$Petal.Length,
+                         dataset$Sepal.Width,
+                        method = "pearson")
+partial_cor$estimate  #각각 결과를 추출할 때
+partial_cor$p.value
+partial_cor$statistic
 
 
 
-#3. 단순 회귀분석 -----------
+#### 준부분상관(semi-partial correlation): 변수의 고유한 영향력
+# IV: x1, x2, DV: y가 있을 때 x2의 효과를 제거 후 x1이 **y의 전체 변량**을 설명하는 비율
+# x1의 독자적인 영향력을 볼 수 있음
+
+iris_spcor <- spcor(dataset, method = "pearson")
+iris_spcor$estimate  #각각 결과를 추출할 때
+iris_spcor$p.value   #각각 결과를 추출할 때
+iris_spcor$statistic #각각 결과를 추출할 때
+
+
+partCor <- spcor.test(dataset$Sepal.Length, dataset$Petal.Length,
+                      dataset$Sepal.Width,
+                      method = "pearson")
+
+partCor$estimate
+partCor$p.value
+partCor$statistic
+
+# 참조:
+#  - 다중 회귀에서, 다음은 검사해야 하는 준부분(또는 부분) 상관관계: 
+#  - X1, X2, X3를 예측 변수로, Y를 기준으로 하는 모델을 가정. 
+#  - Y에서 X2와 X3를 제거한 후 X1과 Y의 준부분 상관이 필요. 
+#  - 1단계에서 Y ~ X2 + X3 중다회귀를 수행. 
+#  - 2단계에서 Y의 잔차를 RY. 
+#  - 3단계에서 RY ~ X1을 회귀분석함
+#  - 3단계에서 얻은 상관 계수는 찾고 있는 준부분 상관
+
+
+
+
+
+#4. 단순 회귀분석 -----------
 
 # lm()는 선형 회귀 모델을 계산하는 데 사용
 # 회귀 방정식 "sales = b0 + b1*youtube"
@@ -272,75 +297,65 @@ plot(model)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Although this course is focused for the most part on linear regression models,
-# the principles of modeling are quite consistent across all types of models
-# that you can build in R:
-# - *Build* a model:
-#   - Specify a model
-#   - Estimate its parameters
-# - *Evaluate* the model's fit
-# - *Explore* the model (predict, plot, estimate...)
-# And so everything taught here and in the next few of lessons is also relevant
-# to those interested in machine learning, mixed models, structural equation
-# modeling, ANOVAs, and more and more...
-
 library(effectsize)   # for parameters_standardize
 library(parameters)   # for model_parameters
 library(performance)  # for model_performance etc..
 library(ggeffects)    # for plotting models
 
+#5. 중다회귀분석(Multiple Linear Regression) -----
 
-# load a data set
+# # install.packages("pacman")
+# pacman:: p_load("tidyverse", "ggplot2", "ggpubr", "datarium")
+# data("marketing", package = "datarium")
+# mydata <- marketing
+# attach(mydata)
+# 
+# #check the corelation between the predoctprs and the outcome
+# # install.packages("Hmisc")
+# 
+# # 패키지 설치(수동)
+# if(!require("Hmisc")){
+#  install.packages(c("Hmisc"))}
+# 
+# library(ggeffects)    # for plotting models
+li
+
+# 데이터셋 로드하기
 data(hardlyworking, package = "effectsize")
 head(hardlyworking)
-# - salary      : Shekels per month
-# - xtra_hours  : Hours over (weekly) over time worked
-# - n_comps     : Number of compliments given to the boss
-# - age         : Age in years.
-# - seniority   : Number of years working in the company
+# - salary      : (한달 급여; 이스라엘 통화단위 Shekels per month)
+# - xtra_hours  : 주당 초과 근무 시간
+# - n_comps     : 상사에 제공되는 칭찬의 수
+# - age         : 나이.
+# - seniority   : 근속년수
 
 
+##5-1) 단순 회귀 예제 ----
 
-# Simple Regression -------------------------------------------------------
-
-# In R, models are build in two parts:
-# 1. *Specifying* the model:
-#   What are the parameters we want to estimate?
-# 2. *Fitting* the model to some data:
-#   Actually estimate the parameters using some data.
+# R에서 모델은 두 부분으로 구축
+# 1. 모델 지정(*Specifying* the model)
+#   - 우리가 추정하고 싶은 매개변수들은 무엇인가?
+# 2. 어떤 데이터를 모델에 적합(*Fitting* the model to some data)
+#   - 실제로 어떤 데이터를 사용해 매개변수를 추정함
 
 
-# Models are usually specified with a formula:
+# 모델들은 보통 어떤 식(formula)으로 지정됨
 y ~ x
-# This can be read as "y is a function of x" or "y is predicted by x"
+# y는 x의 함수이다로 읽음. 혹은 y는 x에 의해 예측됨
 
-# Different model types require different fitting functions (we will get back to
-# this later on in the semester, and in the following semester) - to fit a
-# Linear Model, we will use `lm()`:
+
+# 선형 모델은 `lm()` 사용
 fit <- lm(salary ~ xtra_hours, data = hardlyworking)
 fit
 
-# Now that we have the model, we can evaluate and explore it!
+# 이젠 모델을 갖게 됐고, 우리는 평가하고 탐색할 수 있음
 
 
-# Some basic stuff: estimate, SE, test values, and more...
+# 기본적인 작업: estimate, SE, test values 등등...
 summary(fit)
 
 
-## Explore the model's *parameters* ----
+## 모델의 매개변수들을 탐색
 
 # CIs
 confint(fit)
@@ -348,67 +363,57 @@ confint(fit)
 # beta
 standardize_parameters(fit, method = "basic")
 
-# Get all at once:
+# 한 번에 보기 
 model_parameters(fit)
 model_parameters(fit, standardize = "basic")
 
 
 
-
-
-
-
-
-## Evaluate the model ----
-# Look at some model indices
-rmse(fit) # or mae(fit)
-r2(fit) # and more...
+## 모델 평가
+# 모델 인덱스 살펴볼 것
+rmse(fit)   # or mae(fit)
+r2(fit)     # 등등
 model_performance(fit)
 
 
 
-
-## Prediction ----
-# and residuals
+## 예측(Prediction) 
+# 그리고 잔차(residuals)
 predict(fit)
 residuals(fit)
-# what is the correlation between these ^ two?
 
-# We can also predict new data:
+
+# 새로운 데이터로 예측할 수도 있음
 (new_observations <- data.frame(xtra_hours = c(-15, 30)))
 predict(fit, newdata = new_observations)
-# We will see many more examples of these next semester in the Machine Learning
-# module.
 
 
-## Plot ----
+## Plot 
 gge_xtra_hours <- ggpredict(fit, "xtra_hours")
 gge_xtra_hours
 plot(gge_xtra_hours)
 plot(gge_xtra_hours, add.data = TRUE, jitter = 0)
-# see more: https://strengejacke.github.io/ggeffects
+
+# 참조: https://strengejacke.github.io/ggeffects
 
 
 
 
 
 
-
-
-# Multiple Regression -----------------------------------------------------
-
-# Multiple predictors in a formula are specified with "+":
+##5-2) 중다 회귀분석 예제  ----
+# 식 안에 중다 예측변수들은 "+" 로 결합됨
 fit2 <- lm(salary ~ xtra_hours + n_comps, data = hardlyworking)
 
 summary(fit2)
 
 
-## Explore the model's *parameters* ----
+## 모델 매개변수 탐색 
 model_parameters(fit2)
 model_parameters(fit2, standardize = "basic") # Get Betas
 
 
-# how will this affect the results?
+# 이것이 결과에 미치는 영향은?
 hardlyworking$xtra_minutes <- hardlyworking$xtra_hours * 60
 
 fit3 <- lm(salary ~ xtra_minutes + n_comps, data = hardlyworking)
@@ -418,14 +423,11 @@ model_parameters(fit3)
 
 
 
-## Evaluate the model ----
+## 모델 평가
 model_performance(fit2)
 
 
-
-
-
-## Predict ----
+## Predict
 new_obs2 <- data.frame(xtra_hours = c(0, 5),
                        # What are negative compliments??
                        # What is HALF a compliment??
@@ -434,21 +436,15 @@ new_obs2
 predict(fit2, newdata = new_obs2)
 
 
-
-
-## Plot ----
+## Plot
 ggpredict(fit2, "xtra_hours")               |> plot(add.data = TRUE, jitter = 0)
-ggpredict(fit2, "n_comps")                  |> plot(add.data = TRUE, jitter = 0.1) # jitter?
+ggpredict(fit2, "n_comps")                  |> plot(add.data = TRUE, jitter = 0.1) 
 ggpredict(fit2, c("xtra_hours", "n_comps")) |> plot(add.data = TRUE, jitter = 0)
-# The lines in the last plot are exactly parallel - why?
 
 
-
-# for multiple regression, you might want to use partial residuals instead of
-# the raw data, by setting `residuals = TRUE`. See:
-# https://strengejacke.github.io/ggeffects/articles/introduction_partial_residuals.html
-
-
+# 중다 회귀에서 raw data 대신 부분잔차(partial residuals) 사용하고 싶다면, 
+# `residuals = TRUE` 를 설정. 
+# 추가 정보:  https://strengejacke.github.io/ggeffects/articles/introduction_partial_residuals.html
 
 
 
@@ -456,47 +452,28 @@ ggpredict(fit2, c("xtra_hours", "n_comps")) |> plot(add.data = TRUE, jitter = 0)
 
 
 
-# More Syntax -------------------------------------------------------------
-
-# If we have non-linear relationships, we can also pre-transform the data,
-# BUT... we can also specify any transformations in the formula:
-fit_seniority <- lm(salary ~ sqrt(seniority), data = hardlyworking)
-
-ggpredict(fit_seniority, "seniority") |>
-  plot(add.data = TRUE, jitter = 0.1)
 
 
 
-# Predict from all variables in the data.frame with a `.` (almost never useful):
-fit_all <- lm(salary ~ ., data = hardlyworking)
-summary(fit_all)
-# (Note that xtra_hours and xtra_minutes are fully colinear - we will see how we
-# might examine this in later lessons.)
 
 
 
-# If we want to fit a model without any predictors (called the empty model, or
-# the intercept-only model):
-fit_intercept <- lm(salary ~ 1, data = hardlyworking)
-summary(fit_intercept)
-predict(fit_intercept) # What's going on here?
 
 
 
-# Exercise ----------------------------------------------------------------
-
-sai <- psychTools::sai
-head(sai)
-?psychTools::sai
 
 
-# 1. Fit a linear model, predicting `joyful` from two variables of your choice.
-#   a. Interpret the model's parameters.
-#   b. Which of the two has the bigger contribution to predicting joy?
-#   c. What is the 80% CI for the second predictor? (see ?model_parameters.glm)
-#   d. What is the R^2 of the model?
-# 2. Plot (with `ggpredict()`) the tri-variate relationship (the relationship
-#   between the outcome, `joyful`, and the two predictors).
-# *. What does `update` do?
-# **. In the `salary` example, what would you recommend to someone who wants a
-#   higher salary to do - work more? or compliment their boss more?
+
+
+
+
+
+
+
+
+
+
+
+
+
+

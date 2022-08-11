@@ -13,13 +13,12 @@
 .libPaths() 
 
 # 설치 경로 변경, 사용자 패키지, 주로 4.1.1버전에 설치하였음
-# .libPaths("C:/Program Files/R/R-4.1.1/library") # 이건 실행되지 않게 하세요.
+.libPaths("C:/Program Files/R/R-4.1.1/library") # 이건 실행되지 않게 하세요.
 
 # Loading my packages
 library(dplyr)
 library(ggplot2)
 ##### ------------------------------ ####
-
 
 
 # 이 코드는 한 줄씩 실행해 가면서 R을 경험하도록 만들었습니다. 
@@ -43,11 +42,12 @@ library(ggplot2)
 # 할당 후 object는 "ENVIRONMENT"에 나타남)
 a <- 12
 
+
 # 이름으로 코드 실행하면, CONSOLE에 내용을 프린트 
 a
 
 # 위의 객체(object)를 값(value)으로 사용할 수도 있음
-a + 10
+
 # "a" 값은 변하지 않음, 
 # 결과가 저장되지도 않음
 
@@ -115,7 +115,7 @@ round(b/2, digits = 1)
 trunc(b/2)   
 
 # 함수 도움말 검색
-?exp
+exp?
 
 
 
@@ -253,7 +253,7 @@ c(rep(c("AD", "MCI", "Control"), each = 5), rep(c("AD", "MCI", "Control"), each 
 # 요인은 범주 벡터
 # 문자 벡터와 달리, 요인은 "수준(levels)"이 있음
 
-sex <- sample(c("F", "M"), size = 5, replace = TRUE)
+sex <- sample(c("F", "M"), size = 10, replace = TRUE)
 
 x <- factor(sex)
 
@@ -511,7 +511,6 @@ head(diamonds, 6)
 # iris_2208080118 <- read.csv("C:/Users/jangg/Dropbox/DellWorks/Doc/01_YHLim Projects/계명대 통계 워크샵_220809/R exercises/KMU_R_workshop/data/ch01_R basic exercises/iris_2208080118.csv", header = TRUE)
 
 
-
 # 평균
 
 Home_grades <- c(95, 72, NA, 79, 100, 82, 55)
@@ -654,7 +653,6 @@ summary(iris_prac)
 
 
 
-
 #10. 결측치(NA; Not Available) 처리 -----------------
 
 # 데이터 분석 전, 결측치 처리를 해야 함
@@ -686,7 +684,7 @@ complete.cases(class_grades_NAprac_2)
 class_grades_NAprac_2[!complete.cases(class_grades_NAprac_2),]
 class_grades_NAprac_2[is.na(class_grades_NAprac_2[3]),c(1:5)]  # 동일함
 
-# 결측치를 평균으로 대체체
+# 결측치를 평균으로 대체
 # ifelse() 함수를 이용하여 NA값을 평균값으로 대체
 # ifelse(조건, 그 조건을 만족할 때 실행되는 표현식, 조건을 불만족할 때 실행되는 표현식)
 class_grades_NAprac_2$science_grades = ifelse(is.na(class_grades_NAprac_2$science_grades), 
@@ -828,6 +826,7 @@ rm(test)
 
 # working directory 확인
 getwd()
+setwd("")
 
 # mannually working directory setting
 # setwd("폴더 경로 삽입")

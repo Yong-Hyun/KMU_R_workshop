@@ -13,7 +13,7 @@
 .libPaths() 
 
 # 설치 경로 변경, 사용자 패키지, 주로 4.1.1버전에 설치하였음
-# .libPaths("C:/Program Files/R/R-4.1.1/library") # 이건 실행되지 않게 하세요. 
+.libPaths("C:/Program Files/R/R-4.1.1/library") # 이건 실행되지 않게 하세요. 
 
 
 ##### ------------------------------ ####
